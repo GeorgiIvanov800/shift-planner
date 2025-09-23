@@ -1,0 +1,43 @@
+services:
+  postgres:
+    container_name: postgres-shift-planner-dev
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: shift_planner
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - shift-planner-net-dev
+
+  keycloak:
+    container_name: keycloak-shift-planner-dev
+    image: quay.io/keycloak/keycloak:26.2.1
+    command: ["start-dev"]
+    environment:
+      PROXY_ADDRESS_FORWARDING: "true"
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: "9090"
+      KC_HOSTNAME_STRICT: "false"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "9090:8080"
+    volumes:
+      - ../keycloak/realm-dev:/opt/keycloak/data/import:Z,ro
+    depends_on:
+      - postgres
+    networks:
+      - shift-planner-net-dev
+volumes:
+  postgres_data:
+  keycloak_data:
+networks:
+  shift-planner-net-dev:
+    driver: bridge
+
